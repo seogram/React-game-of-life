@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Grid from './grid';
-import Buttons from './button'
+import Buttons from './button';
+import Info from "./info";
 import './index.css';
 import 'semantic-ui-css/semantic.min.css';
 
@@ -20,6 +21,8 @@ class App extends React.Component {
 			 * create initial array and fill it with false cells (dead cells)
 			 */
 			initialGrid: Array(this.rows).fill().map(() => Array(this.cols).fill(false)),
+			liveCell: null,
+			deadCell: null,
 			played: false,
 			paused: true
 		}
@@ -30,9 +33,12 @@ class App extends React.Component {
 	 */
 	seed = () => {
 		let gridCopy = [...this.state.initialGrid];
+		let liveCells = 0;
+		let deadCells = 0;
 		for (let i = 0; i < this.rows; i++) {
 			for (let j = 0; j < this.cols; j++) {
 				if (Math.floor(Math.random() * 4) === 1) {
+					this.setState({ liveCell: liveCells++, deadCell: (this.cols * this.rows) - liveCells });
 					gridCopy[i][j] = true;
 				}
 			}
@@ -57,25 +63,37 @@ class App extends React.Component {
 	updateGrid = () => {
 		let grid = this.state.initialGrid;
 		let mirrorGrid = [...this.state.initialGrid];
+		let liveCell = 0;
+		let deadCell = 0;
+
 		for (let i = 0; i < this.rows; i++) {
 			for (let j = 0; j < this.cols; j++) {
 				let neighboursCount = 0;
-		
-				if (i < this.rows - 1 && grid[i + 1][j]) neighboursCount ++; //bottom center
-				if (i < this.rows - 1 && j > 0 && grid[i + 1][j - 1]) neighboursCount ++; //bottom left
-				if (i < this.rows - 1 && this.cols - 1 && grid[i + 1][j + 1]) neighboursCount ++; //bottom right
-				if (i > 0 && grid[i - 1][j]) neighboursCount ++; // top center
-				if (i > 0 && j > 0 && grid[i - 1][j - 1]) neighboursCount ++; // top left corner
-				if (i > 0 && j < this.cols - 1 && grid[i - 1][j + 1]) neighboursCount ++; //top right
-				if (j < this.cols - 1 && grid[i][j + 1]) neighboursCount ++; //middle right
-				if (j > 0 && grid[i][j - 1]) neighboursCount ++; //middle left
-			
-				if (grid[i][j] && (neighboursCount  < 2 || neighboursCount  > 3)) mirrorGrid[i][j] = false;
-				if (!grid[i][j] && neighboursCount  === 3) mirrorGrid[i][j] = true;
+
+				if (i < this.rows - 1 && grid[i + 1][j]) neighboursCount++; //bottom center
+				if (i < this.rows - 1 && j > 0 && grid[i + 1][j - 1]) neighboursCount++; //bottom left
+				if (i < this.rows - 1 && this.cols - 1 && grid[i + 1][j + 1]) neighboursCount++; //bottom right
+				if (i > 0 && grid[i - 1][j]) neighboursCount++; // top center
+				if (i > 0 && j > 0 && grid[i - 1][j - 1]) neighboursCount++; // top left corner
+				if (i > 0 && j < this.cols - 1 && grid[i - 1][j + 1]) neighboursCount++; //top right
+				if (j < this.cols - 1 && grid[i][j + 1]) neighboursCount++; //middle right
+				if (j > 0 && grid[i][j - 1]) neighboursCount++; //middle left
+
+				if (grid[i][j] && (neighboursCount < 2 || neighboursCount > 3)) {
+					mirrorGrid[i][j] = false; deadCell++;
+				}
+
+				if (!grid[i][j] && neighboursCount === 3) {
+					mirrorGrid[i][j] = true;
+					liveCell++;
+				}
 			}
 		}
+
 		this.setState({
-			initialGrid: mirrorGrid
+			initialGrid: mirrorGrid,
+			liveCell,
+			deadCell
 		});
 
 	}
@@ -98,6 +116,11 @@ class App extends React.Component {
 					pauseBtn={this.pauseBtn}
 					played={this.state.played}
 					paused={this.state.paused}
+				/>
+				<br/>
+				<Info
+					liveCell={this.state.liveCell}
+					deadCell={this.state.deadCell}
 				/>
 			</div>
 		);
