@@ -39,6 +39,18 @@ class App extends Component {
     }
 
 
+    playButton = () => {
+		clearInterval(this.intervalId);
+		this.setState({ play: true, pause: false });
+		this.intervalId = setInterval(this.updateGrid, 500);
+	}
+
+	pauseButton = () => {
+		this.setState({ play: false, pause: true });
+		clearInterval(this.intervalId);
+    }
+    
+    
     updateGrid = () => {
         let grid = this.state.initialGrid;
         let mirrorGrid = [...this.state.initialGrid];
@@ -59,7 +71,6 @@ class App extends Component {
                 if (!grid[i][j] && neighboursCount === 3) mirrorGrid[i][j] = true;
             }
         }
-        console.log(mirrorGrid);
         this.setState({
             initialGrid: mirrorGrid
         });
