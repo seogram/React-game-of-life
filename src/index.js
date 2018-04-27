@@ -16,8 +16,8 @@ class App extends Component {
              * create initial array and fill it with false cells (dead cells)
              */
             initialGrid: Array(this.rows).fill().map(() => Array(this.cols).fill(false)),
-            play: true,
-            pause: false
+            played: true,
+            paused: false
         }
     }
 
@@ -39,18 +39,18 @@ class App extends Component {
     }
 
 
-    playButton = () => {
-		clearInterval(this.intervalId);
-		this.setState({ play: true, pause: false });
-		this.intervalId = setInterval(this.updateGrid, 500);
-	}
-
-	pauseButton = () => {
-		this.setState({ play: false, pause: true });
-		clearInterval(this.intervalId);
+    playBtn = () => {
+        clearInterval(this.intervalId);
+        this.setState({ play: true, pause: false });
+        this.intervalId = setInterval(this.updateGrid, 500);
     }
-    
-    
+
+    pauseBtn = () => {
+        this.setState({ play: false, pause: true });
+        clearInterval(this.intervalId);
+    }
+
+
     updateGrid = () => {
         let grid = this.state.initialGrid;
         let mirrorGrid = [...this.state.initialGrid];
@@ -82,13 +82,23 @@ class App extends Component {
     componentDidMount() {
         this.seed();
         this.updateGrid();
+        this.playBtn();
 
     }
     render() {
         return (
             <div>
-                Game of life
-            </div>
+                <Grid
+                    initialGrid={this.state.initialGrid}
+                    rows={this.rows}
+                    cols={this.cols}
+                />
+                <Buttons
+                    playButton={this.playBtn}
+                    pauseButton={this.pauseBtn}
+                    play={this.state.played}
+                    pause={this.state.paused}
+                />            </div>
         );
     }
 }
